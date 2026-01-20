@@ -71,8 +71,26 @@ async function ensureUserSetup(userId: string, email: string, fullName?: string)
         },
       })
     })
+
+    // Notify n8n webhook about new user signup (fire and forget)
+    notifyUserSignup(email).catch((err) => {
+      console.error('Failed to notify user signup webhook:', err)
+    })
   } catch (error) {
     console.error('Error ensuring user setup:', error)
+  }
+}
+
+async function notifyUserSignup(email: string) {
+  const webhookUrl = new URL('https://n8n.codext.de/webhook/vectorbase-user-sign-up')
+  webhookUrl.searchParams.set('email', email)
+
+  const response = await fetch(webhookUrl.toString(), {
+    method: 'GET',
+  })
+
+  if (!response.ok) {
+    throw new Error(`Webhook responded with status ${response.status}`)
   }
 }
 

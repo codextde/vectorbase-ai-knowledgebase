@@ -4,13 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Menu } from 'lucide-react'
+import { Menu, Github } from 'lucide-react'
 import Image from 'next/image'
 
 const navLinks = [
   { href: '#features', label: 'Features' },
   { href: '#pricing', label: 'Pricing' },
-  { href: 'https://github.com', label: 'GitHub' },
+  { href: 'https://github.com', label: 'Docs' },
+  { href: 'https://github.com', label: 'GitHub', icon: Github },
 ]
 
 export function LandingMobileNav() {
@@ -19,39 +20,44 @@ export function LandingMobileNav() {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
+        <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10">
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-72">
+      <SheetContent side="right" className="w-72 border-white/10 bg-[#0a0a0f]/95 backdrop-blur-xl">
         <SheetHeader className="text-left">
           <SheetTitle className="flex items-center gap-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-lg">
               <Image src="/logo.jpg" alt="VectorBase" fill className="object-cover" />
             </div>
-            <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent font-bold">
+            <span className="text-white font-semibold">
               VectorBase
             </span>
           </SheetTitle>
         </SheetHeader>
-        <nav className="mt-8 flex flex-col gap-4">
+        <nav className="mt-8 flex flex-col gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-white/70 transition-colors hover:bg-white/5 hover:text-white"
             >
+              {link.icon && <link.icon className="h-4 w-4" />}
               {link.label}
             </Link>
           ))}
-          <div className="mt-4 pt-4 border-t space-y-3">
+          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
             <Link href="/auth/login" onClick={() => setIsOpen(false)}>
-              <Button variant="outline" className="w-full">Sign in</Button>
+              <Button variant="ghost" className="w-full justify-center text-white/80 hover:bg-white/5 hover:text-white">
+                Log in
+              </Button>
             </Link>
             <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
-              <Button className="w-full">Get Started</Button>
+              <Button className="w-full bg-white text-black hover:bg-white/90">
+                Get Started
+              </Button>
             </Link>
           </div>
         </nav>

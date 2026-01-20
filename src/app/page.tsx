@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { prisma } from '@/lib/prisma'
+import type { PlanLimits } from '@/types/database'
 import {
   Database,
   FileText,
@@ -12,6 +14,10 @@ import {
   Code,
   ArrowRight,
   Check,
+  Zap,
+  Building2,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-react'
 
 const features = [
@@ -47,42 +53,45 @@ const features = [
   },
 ]
 
-const plans = [
-  {
-    name: 'Free',
-    price: '$0',
-    description: 'Perfect for trying out VectorBase',
-    features: ['1 Project', '10 Documents', '20 Messages/month', 'Community Support'],
-    cta: 'Get Started',
-    popular: false,
-  },
-  {
-    name: 'Hobby',
-    price: '$19',
-    description: 'For individuals and small projects',
-    features: ['5 Projects', '100 Documents per project', '2,000 Messages/month', '5 Websites per project', 'Email Support'],
-    cta: 'Start Free Trial',
-    popular: false,
-  },
-  {
-    name: 'Pro',
-    price: '$99',
-    description: 'For professionals and growing teams',
-    features: ['20 Projects', 'Unlimited Documents', '10,000 Messages/month', 'Unlimited Websites', 'Priority Support', 'API Access', 'Remove Branding'],
-    cta: 'Start Free Trial',
-    popular: true,
-  },
-  {
-    name: 'Enterprise',
-    price: '$499',
-    description: 'For large organizations',
-    features: ['Unlimited Everything', 'Dedicated Support', 'Custom Integrations', 'SLA', 'SSO'],
-    cta: 'Contact Sales',
-    popular: false,
-  },
-]
+const planIcons: Record<string, React.ElementType> = {
+  free: Sparkles,
+  starter: Zap,
+  pro: TrendingUp,
+  enterprise: Building2,
+}
 
-export default function HomePage() {
+const planColors: Record<string, string> = {
+  free: 'bg-slate-100 text-slate-700 border-slate-200',
+  starter: 'bg-blue-100 text-blue-700 border-blue-200',
+  pro: 'bg-purple-100 text-purple-700 border-purple-200',
+  enterprise: 'bg-amber-100 text-amber-700 border-amber-200',
+}
+
+interface ParsedPlan {
+  id: string
+  name: string
+  description: string | null
+  price_monthly: number
+  price_yearly: number
+  limits: PlanLimits
+  features: string[]
+}
+
+export default async function HomePage() {
+  const dbPlans = await prisma.plan.findMany({
+    where: { isActive: true },
+    orderBy: { priceMonthly: 'asc' },
+  })
+
+  const plans: ParsedPlan[] = dbPlans.map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    description: plan.description,
+    price_monthly: plan.priceMonthly,
+    price_yearly: plan.priceYearly,
+    limits: plan.limits as unknown as PlanLimits,
+    features: plan.features as unknown as string[],
+  }))
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -226,40 +235,78 @@ export default function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold">Simple, Transparent Pricing</h2>
               <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-                Choose the plan that works best for you
+                Choose the plan that best fits your needs. Upgrade or downgrade anytime.
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {plans.map((plan) => (
-                <Card key={plan.name} className={plan.popular ? 'border-primary' : ''}>
-                  <CardHeader>
-                    {plan.popular && (
-                      <Badge className="w-fit mb-2">Most Popular</Badge>
+              {plans.map((plan) => {
+                const Icon = planIcons[plan.id] || Sparkles
+                const isPopular = plan.id === 'pro'
+                
+                return (
+                  <Card 
+                    key={plan.id} 
+                    className={`relative flex flex-col ${isPopular ? 'border-purple-300 dark:border-purple-700' : ''}`}
+                  >
+                    {isPopular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <Badge className="bg-purple-600 text-white">Most Popular</Badge>
+                      </div>
                     )}
-                    <CardTitle>{plan.name}</CardTitle>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">{plan.price}</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                    <CardDescription>{plan.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-2 text-sm">
-                          <Check className="h-4 w-4 text-primary" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href="/auth/signup" className="block">
-                      <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
-                        {plan.cta}
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
+                    
+                    <CardHeader className="pb-4">
+                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center mb-3 ${planColors[plan.id] || planColors.free}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <CardTitle>{plan.name}</CardTitle>
+                      <CardDescription className="min-h-[40px]">
+                        {plan.description}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="flex-1">
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold">${plan.price_monthly}</span>
+                        <span className="text-muted-foreground">/month</span>
+                        {plan.price_yearly > 0 && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            ${plan.price_yearly}/year (save ${plan.price_monthly * 12 - plan.price_yearly})
+                          </p>
+                        )}
+                      </div>
+                      
+                      <ul className="space-y-3">
+                        {plan.features.map((feature, index) => (
+                          <li key={index} className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    
+                    <CardFooter className="pt-4">
+                      {plan.id === 'enterprise' ? (
+                        <Button variant="outline" className="w-full">
+                          Contact Sales
+                        </Button>
+                      ) : plan.id === 'free' ? (
+                        <Link href="/auth/signup" className="w-full">
+                          <Button variant="outline" className="w-full">
+                            Get Started Free
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Link href="/auth/signup" className="w-full">
+                          <Button className="w-full" variant={isPopular ? 'default' : 'outline'}>
+                            Start Free Trial
+                          </Button>
+                        </Link>
+                      )}
+                    </CardFooter>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         </section>

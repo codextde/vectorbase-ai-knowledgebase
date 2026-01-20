@@ -5,6 +5,72 @@ import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardHeader } from '@/components/dashboard/header'
 import type { Profile, Organization, Subscription, Plan } from '@/types/database'
 
+async function ensureUserSetup(userId: string, email: string, fullName?: string): Promise<boolean> {
+  try {
+    const existingProfile = await prisma.profile.findUnique({
+      where: { id: userId },
+    })
+
+    if (existingProfile) {
+      const existingMembership = await prisma.organizationMember.findFirst({
+        where: { userId },
+      })
+      if (existingMembership) {
+        return true
+      }
+    }
+
+    const userName = fullName || email.split('@')[0]
+    const baseSlug = userName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 30)
+    const orgSlug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`
+
+    await prisma.$transaction(async (tx) => {
+      if (!existingProfile) {
+        await tx.profile.create({
+          data: {
+            id: userId,
+            email: email,
+            fullName: fullName || null,
+          },
+        })
+      }
+
+      const organization = await tx.organization.create({
+        data: {
+          name: `${userName}'s Workspace`,
+          slug: orgSlug,
+          ownerId: userId,
+        },
+      })
+
+      await tx.organizationMember.create({
+        data: {
+          organizationId: organization.id,
+          userId: userId,
+          role: 'owner',
+        },
+      })
+
+      await tx.subscription.create({
+        data: {
+          organizationId: organization.id,
+          planId: 'free',
+          status: 'active',
+        },
+      })
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error ensuring user setup:', error)
+    return false
+  }
+}
+
 interface OrgWithDetails extends Organization {
   organization_members: { role: string }[]
   subscriptions: (Subscription & { plans: Plan })[]
@@ -22,11 +88,11 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
 
-  const profile = await prisma.profile.findUnique({
+  let profile = await prisma.profile.findUnique({
     where: { id: user.id },
   })
 
-  const membership = await prisma.organizationMember.findFirst({
+  let membership = await prisma.organizationMember.findFirst({
     where: { userId: user.id },
     include: {
       organization: {
@@ -39,8 +105,32 @@ export default async function DashboardLayout({
     },
   })
 
-  if (!membership) {
-    redirect('/auth/login')
+  if (!profile || !membership) {
+    const result = await ensureUserSetup(user.id, user.email!, user.user_metadata?.full_name as string | undefined)
+    if (!result) {
+      redirect('/auth/login?error=setup_failed')
+    }
+    
+    profile = await prisma.profile.findUnique({
+      where: { id: user.id },
+    })
+    
+    membership = await prisma.organizationMember.findFirst({
+      where: { userId: user.id },
+      include: {
+        organization: {
+          include: {
+            subscription: {
+              include: { plan: true },
+            },
+          },
+        },
+      },
+    })
+    
+    if (!membership) {
+      redirect('/auth/login?error=setup_failed')
+    }
   }
 
   const profileData: Profile | null = profile ? {

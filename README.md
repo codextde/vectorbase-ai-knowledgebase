@@ -149,11 +149,12 @@ Set `NEXT_PUBLIC_SELF_HOSTED=true` in your environment to enable self-hosted mod
 
 **Cloud Plans:**
 
-| Plan       | Price   | Projects  | Sources      | Messages/Month |
-| ---------- | ------- | --------- | ------------ | -------------- |
-| Free       | $0/mo   | 1         | 10 documents | 20             |
-| Pro        | $10/mo  | Unlimited | Unlimited    | 1,000          |
-| Enterprise | $100/mo | Unlimited | Unlimited    | 10,000+        |
+| Plan       | Price    | Projects  | Documents | Messages/Month |
+| ---------- | -------- | --------- | --------- | -------------- |
+| Free       | $0/mo    | 1         | 10        | 20             |
+| Starter    | $19/mo   | 3         | 100 each  | 1,000          |
+| Pro        | $49/mo   | 10        | 500 each  | 10,000         |
+| Enterprise | $199/mo  | Unlimited | Unlimited | Unlimited      |
 
 ---
 

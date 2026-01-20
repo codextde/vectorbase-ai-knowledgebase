@@ -16,6 +16,7 @@ import { LogOut, Settings, User as UserIcon, Menu } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '@/types/database'
 import { useMobileSidebar } from './mobile-sidebar-context'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 interface DashboardHeaderProps {
   user: User
@@ -52,7 +53,9 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
       </Button>
       <div className="hidden md:block" />
       
-      <DropdownMenu>
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
@@ -87,7 +90,8 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
     </header>
   )
 }

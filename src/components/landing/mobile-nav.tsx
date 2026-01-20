@@ -10,8 +10,8 @@ import Image from 'next/image'
 const navLinks = [
   { href: '#features', label: 'Features' },
   { href: '#pricing', label: 'Pricing' },
-  { href: 'https://github.com', label: 'Docs' },
-  { href: 'https://github.com', label: 'GitHub', icon: Github },
+  { href: 'https://github.com/codextde/vectorbase-ai-knowledgebase', label: 'Docs' },
+  { href: 'https://github.com/codextde/vectorbase-ai-knowledgebase', label: 'GitHub', icon: Github },
 ]
 
 export function LandingMobileNav() {

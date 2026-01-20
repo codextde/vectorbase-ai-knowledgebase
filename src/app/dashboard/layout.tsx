@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardHeader } from '@/components/dashboard/header'
+import { MobileSidebarProvider } from '@/components/dashboard/mobile-sidebar-context'
+import { MobileSidebarDrawer } from '@/components/dashboard/mobile-sidebar-drawer'
 import type { Profile, Organization, Subscription, Plan } from '@/types/database'
 
 async function ensureUserSetup(userId: string, email: string, fullName?: string): Promise<boolean> {
@@ -180,19 +182,26 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <DashboardSidebar 
-        user={user} 
-        profile={profileData} 
-        organizations={[currentOrg]}
-        currentOrg={currentOrg}
-      />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <DashboardHeader user={user} profile={profileData} />
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+    <MobileSidebarProvider>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <div className="hidden md:flex">
+          <DashboardSidebar 
+            user={user} 
+            profile={profileData} 
+            organizations={[currentOrg]}
+            currentOrg={currentOrg}
+          />
+        </div>
+        <MobileSidebarDrawer 
+          currentPlan={currentOrg?.subscriptions?.[0]?.plans?.name || 'Free'} 
+        />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <DashboardHeader user={user} profile={profileData} />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </MobileSidebarProvider>
   )
 }

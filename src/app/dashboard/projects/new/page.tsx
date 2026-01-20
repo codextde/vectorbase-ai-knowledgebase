@@ -42,7 +42,7 @@ export default function NewProjectPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold">Create Project</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Create Project</h1>
           <p className="text-muted-foreground">Set up a new knowledge base project</p>
         </div>
       </div>
@@ -74,13 +74,13 @@ export default function NewProjectPage() {
                 rows={3}
               />
             </div>
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link href="/dashboard/projects" className="flex-1">
                 <Button type="button" variant="outline" className="w-full">
                   Cancel
                 </Button>
               </Link>
-              <Button type="submit" className="flex-1" disabled={loading}>
+              <Button type="submit" className="flex-1 w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Project
               </Button>

@@ -118,13 +118,13 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Analytics</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
         <p className="text-muted-foreground">
           Monitor your knowledge base usage and performance
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
@@ -178,7 +178,7 @@ export default async function AnalyticsPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -248,7 +248,7 @@ export default async function AnalyticsPage() {
           <CardDescription>Your usage for the current billing period</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Messages (30 days)</p>
               <p className="text-2xl font-bold">{messagesLast30Days}</p>

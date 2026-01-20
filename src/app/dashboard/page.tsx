@@ -44,20 +44,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back! Here&apos;s an overview of your knowledge bases.</p>
         </div>
         <Link href="/dashboard/projects/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             New Project
           </Button>
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link key={stat.label} href={stat.href}>
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Recent Projects</CardTitle>

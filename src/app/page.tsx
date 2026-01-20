@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge'
 import { prisma } from '@/lib/prisma'
 import type { PlanLimits } from '@/types/database'
+import { LandingMobileNav } from '@/components/landing/mobile-nav'
 import {
   Database,
   FileText,
@@ -121,7 +122,7 @@ export default async function HomePage() {
               GitHub
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <Link href="/auth/login">
               <Button variant="ghost">Sign in</Button>
             </Link>
@@ -129,19 +130,20 @@ export default async function HomePage() {
               <Button>Get Started</Button>
             </Link>
           </div>
+          <LandingMobileNav />
         </div>
       </header>
 
       <main>
-        <section className="py-20 md:py-32">
+        <section className="py-12 sm:py-20 md:py-32">
           <div className="container mx-auto px-4 text-center">
             <Badge variant="secondary" className="mb-4">
               Developer-Friendly AI Knowledgebase
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-4xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight max-w-4xl mx-auto">
               Build AI-Powered Knowledge Bases in Minutes
             </h1>
-            <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               Upload documents, crawl websites, and create powerful AI assistants. 
               Perfect for chatbots, search, and n8n integrations.
             </p>
@@ -238,7 +240,7 @@ export default async function HomePage() {
                 Choose the plan that best fits your needs. Upgrade or downgrade anytime.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
               {plans.map((plan) => {
                 const Icon = planIcons[plan.id] || Sparkles
                 const isPopular = plan.id === 'pro'

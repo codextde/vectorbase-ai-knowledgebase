@@ -41,7 +41,7 @@ export default async function PlaygroundPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Playground</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Playground</h1>
         <p className="text-muted-foreground">
           Test and interact with your knowledge bases
         </p>
@@ -64,7 +64,7 @@ export default async function PlaygroundPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project: ProjectWithCount) => (
             <Card key={project.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
@@ -116,7 +116,7 @@ export default async function PlaygroundPage() {
           <CardDescription>Get started with testing your knowledge bases</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
             <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary flex-shrink-0">
                 1

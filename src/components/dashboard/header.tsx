@@ -12,9 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { LogOut, Settings, User as UserIcon } from 'lucide-react'
+import { LogOut, Settings, User as UserIcon, Menu } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '@/types/database'
+import { useMobileSidebar } from './mobile-sidebar-context'
 
 interface DashboardHeaderProps {
   user: User
@@ -23,6 +24,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
   const router = useRouter()
+  const { setIsOpen } = useMobileSidebar()
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -38,8 +40,17 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
     .toUpperCase() || user.email?.[0].toUpperCase() || 'U'
 
   return (
-    <header className="flex h-14 items-center justify-between border-b px-6">
-      <div />
+    <header className="flex h-14 items-center justify-between border-b px-4 md:px-6">
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="md:hidden"
+        onClick={() => setIsOpen(true)}
+      >
+        <Menu className="h-5 w-5" />
+        <span className="sr-only">Open menu</span>
+      </Button>
+      <div className="hidden md:block" />
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

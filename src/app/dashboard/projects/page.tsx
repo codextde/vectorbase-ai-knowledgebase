@@ -35,13 +35,13 @@ export default async function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Projects</h1>
           <p className="text-muted-foreground">Manage your knowledge base projects</p>
         </div>
         <Link href="/dashboard/projects/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             New Project
           </Button>
@@ -49,7 +49,7 @@ export default async function ProjectsPage() {
       </div>
 
       {projects.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project: typeof projects[number]) => (
             <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
               <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">

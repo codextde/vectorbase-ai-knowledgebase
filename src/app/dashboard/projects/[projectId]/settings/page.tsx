@@ -62,9 +62,9 @@ export default async function ProjectSettingsPage({ params }: ProjectSettingsPag
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div>
-          <h1 className="text-3xl font-bold">Project Settings</h1>
-          <p className="text-muted-foreground">{project.name}</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold">Project Settings</h1>
+          <p className="text-muted-foreground truncate">{project.name}</p>
         </div>
       </div>
 

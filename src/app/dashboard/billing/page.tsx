@@ -21,6 +21,7 @@ import { format, subDays } from 'date-fns'
 import type { Plan, PlanLimits } from '@/types/database'
 import { CheckoutButton } from '@/components/billing/checkout-button'
 import { ManageSubscriptionButton } from '@/components/billing/manage-subscription-button'
+import { BillingSuccessConfetti } from '@/components/billing/billing-success-confetti'
 
 interface PlanWithParsedData extends Omit<Plan, 'limits' | 'features'> {
   limits: PlanLimits
@@ -129,7 +130,8 @@ export default async function BillingPage({
   const hasStripeCustomer = !!currentSubscription?.stripeCustomerId
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
+      <BillingSuccessConfetti showSuccess={showSuccess} />
       {showSuccess && (
         <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
           <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -158,9 +160,9 @@ export default async function BillingPage({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Billing & Plans</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Billing & Plans</h1>
           <p className="text-muted-foreground">
             Manage your subscription and view usage
           </p>
@@ -168,7 +170,7 @@ export default async function BillingPage({
         {hasStripeCustomer && <ManageSubscriptionButton />}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -296,7 +298,7 @@ export default async function BillingPage({
           Choose the plan that best fits your needs. Upgrade or downgrade anytime.
         </p>
         
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {parsedPlans.map((plan) => {
             const Icon = planIcons[plan.id] || Sparkles
             const isCurrentPlan = plan.id === currentPlanId

@@ -155,30 +155,30 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <Link href="/dashboard/projects">
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold">{project.name}</h1>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">{project.name}</h1>
             <Badge variant={project.isActive ? 'default' : 'secondary'}>
               {project.isActive ? 'Active' : 'Inactive'}
             </Badge>
           </div>
-          <p className="text-muted-foreground">{project.description || 'No description'}</p>
+          <p className="text-muted-foreground truncate">{project.description || 'No description'}</p>
         </div>
-        <Link href={`/dashboard/projects/${projectId}/settings`}>
-          <Button variant="outline">
+        <Link href={`/dashboard/projects/${projectId}/settings`} className="shrink-0">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </Button>
         </Link>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         <Card className="transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Documents</CardTitle>
@@ -242,8 +242,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       </div>
 
       <Tabs defaultValue="sources" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <TabsList>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="sources">Sources</TabsTrigger>
             <TabsTrigger value="playground">Playground</TabsTrigger>
             <TabsTrigger value="api">API</TabsTrigger>

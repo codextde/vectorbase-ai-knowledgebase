@@ -44,13 +44,13 @@ export default async function ApiKeysPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">API Keys</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">API Keys</h1>
         <p className="text-muted-foreground">
           Manage API keys across all your projects
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total API Keys</CardTitle>
@@ -152,7 +152,7 @@ export default async function ApiKeysPage() {
                               </code>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4 text-sm">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-sm">
                             {apiKey.lastUsedAt && (
                               <div className="flex items-center gap-1 text-muted-foreground">
                                 <Clock className="h-3 w-3" />

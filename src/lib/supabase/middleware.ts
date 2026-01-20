@@ -30,11 +30,11 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user }, error } = await supabase.auth.getUser()
+  
+  const isAuthenticated = !!user && !error
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/auth')
   const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
-
-  const isAuthenticated = !!user && !error
 
   if (!isAuthenticated && isDashboardRoute) {
     const url = request.nextUrl.clone()

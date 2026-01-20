@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Footer } from "@/components/footer";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,7 +77,8 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/50 via-background to-background p-4">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50/50 via-background to-background">
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link href="/" className="flex flex-col items-center mb-8 group">
           <div className="relative h-16 w-16 overflow-hidden rounded-2xl shadow-lg shadow-blue-500/20 transition-all group-hover:shadow-xl group-hover:shadow-blue-500/30 group-hover:scale-105">
@@ -198,6 +200,8 @@ function LoginForm() {
           </CardFooter>
         </Card>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }

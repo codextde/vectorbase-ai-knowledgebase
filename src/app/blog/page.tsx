@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Calendar, Clock, User, Github, Twitter } from 'lucide-react'
+import { Footer } from '@/components/footer'
+import { ArrowRight, Calendar, Clock, User } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -261,34 +262,7 @@ export default function BlogPage() {
         </section>
       </main>
 
-      <footer className="border-t border-white/5 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2.5">
-              <div className="relative h-8 w-8 overflow-hidden rounded-lg">
-                <Image src="/logo.jpg" alt="VectorBase" fill className="object-cover" />
-              </div>
-              <span className="text-lg font-semibold tracking-tight">VectorBase</span>
-            </div>
-            <div className="flex gap-6">
-              <Link href="/privacy" className="text-sm text-white/60 hover:text-white">Privacy</Link>
-              <Link href="/terms" className="text-sm text-white/60 hover:text-white">Terms</Link>
-              <Link href="/security" className="text-sm text-white/60 hover:text-white">Security</Link>
-            </div>
-            <div className="flex gap-4">
-              <Link href="https://twitter.com" className="text-white/40 transition-colors hover:text-white">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="https://github.com/codextde/vectorbase-ai-knowledgebase" className="text-white/40 transition-colors hover:text-white">
-                <Github className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-          <p className="mt-8 text-center text-sm text-white/40">
-            © {new Date().getFullYear()} VectorBase. All rights reserved.
-          </p>
-        </div>
-      </footer>
+<Footer />
     </div>
   )
 }

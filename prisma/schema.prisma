@@ -1,0 +1,315 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [uuid_ossp(map: "uuid-ossp"), vector]
+}
+
+model Profile {
+  id                  String               @id @db.Uuid
+  email               String
+  fullName            String?              @map("full_name")
+  avatarUrl           String?              @map("avatar_url")
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  organizationMembers OrganizationMember[]
+  ownedOrganizations  Organization[]       @relation("OrganizationOwner")
+  sentInvites         OrganizationInvite[] @relation("InvitedBy")
+
+  @@map("profiles")
+}
+
+model Organization {
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  slug         String               @unique
+  ownerId      String               @map("owner_id") @db.Uuid
+  settings     Json                 @default("{}")
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  members      OrganizationMember[]
+  invites      OrganizationInvite[]
+  owner        Profile              @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  projects     Project[]
+  subscription Subscription?
+  usageRecords UsageRecord[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  role           String       @default("member")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+model OrganizationInvite {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  email          String
+  role           String       @default("member")
+  invitedBy      String       @map("invited_by") @db.Uuid
+  token          String       @unique
+  status         String       @default("pending") // pending, accepted, expired, cancelled
+  expiresAt      DateTime     @map("expires_at") @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter        Profile      @relation("InvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, email])
+  @@map("organization_invites")
+}
+
+model Plan {
+  id            String         @id
+  name          String
+  description   String?
+  priceMonthly  Int            @default(0) @map("price_monthly")
+  priceYearly   Int            @default(0) @map("price_yearly")
+  limits        Json           @default("{\"projects\": 1, \"storage_mb\": 100, \"team_members\": 1, \"websites_per_project\": 1, \"documents_per_project\": 10, \"message_credits_monthly\": 20}")
+  features      Json           @default("[]")
+  isActive      Boolean        @default(true) @map("is_active")
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                   String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String       @unique @map("organization_id") @db.Uuid
+  planId               String       @default("free") @map("plan_id")
+  status               String       @default("active")
+  currentPeriodStart   DateTime?    @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd     DateTime?    @map("current_period_end") @db.Timestamptz(6)
+  cancelAtPeriodEnd    Boolean      @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  stripeCustomerId     String?      @map("stripe_customer_id")
+  stripePriceId        String?      @map("stripe_price_id")
+  stripeSubscriptionId String?      @map("stripe_subscription_id")
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan                 Plan         @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Project {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  name           String
+  description    String?
+  settings       Json           @default("{\"chat_model\": \"gpt-4o-mini\", \"max_tokens\": 1000, \"temperature\": 0.7, \"system_prompt\": \"You are a helpful assistant. Answer questions based on the provided context. If you cannot find the answer in the context, say so.\", \"embedding_model\": \"text-embedding-3-small\", \"embedding_dimensions\": 1536}")
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  apiKeys        ApiKey[]
+  chunks         Chunk[]
+  conversations  Conversation[]
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sources        Source[]
+  usageRecords   UsageRecord[]
+
+  @@map("projects")
+}
+
+model Source {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId       String          @map("project_id") @db.Uuid
+  type            String
+  name            String
+  status          String          @default("pending")
+  errorMessage    String?         @map("error_message")
+  metadata        Json            @default("{}")
+  chunksCount     Int             @default(0) @map("chunks_count")
+  tokensCount     Int             @default(0) @map("tokens_count")
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  autoRetrain     Boolean         @default(false) @map("auto_retrain")
+  lastRetrainedAt DateTime?       @map("last_retrained_at") @db.Timestamptz(6)
+  chunks          Chunk[]
+  sourceDocument  SourceDocument?
+  sourceNotion    SourceNotion?
+  sourceQa        SourceQa?
+  sourceText      SourceText?
+  sourceWebsite   SourceWebsite?
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("sources")
+}
+
+model SourceDocument {
+  id           String @id @db.Uuid
+  fileName     String @map("file_name")
+  fileType     String @map("file_type")
+  fileSize     Int    @map("file_size")
+  storagePath  String @map("storage_path")
+  originalName String @map("original_name")
+  source       Source @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("source_documents")
+}
+
+model SourceText {
+  id      String @id @db.Uuid
+  content String
+  source  Source @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("source_texts")
+}
+
+model SourceQa {
+  id       String @id @db.Uuid
+  question String
+  answer   String
+  source   Source @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("source_qa")
+}
+
+model SourceWebsite {
+  id            String        @id @db.Uuid
+  url           String
+  crawlType     String        @default("sitemap") @map("crawl_type")
+  includePaths  String[]      @default([]) @map("include_paths")
+  excludePaths  String[]      @default([]) @map("exclude_paths")
+  pagesCrawled  Int           @default(0) @map("pages_crawled")
+  lastCrawledAt DateTime?     @map("last_crawled_at") @db.Timestamptz(6)
+  slowScraping  Boolean       @default(false) @map("slow_scraping")
+  source        Source        @relation(fields: [id], references: [id], onDelete: Cascade)
+  links         WebsiteLink[]
+
+  @@map("source_websites")
+}
+
+model WebsiteLink {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceWebsiteId String        @map("source_website_id") @db.Uuid
+  url             String
+  title           String?
+  contentSize     Int?          @map("content_size")
+  status          String        @default("pending")
+  isExcluded      Boolean       @default(false) @map("is_excluded")
+  errorMessage    String?       @map("error_message")
+  lastCrawledAt   DateTime?     @map("last_crawled_at") @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  sourceWebsite   SourceWebsite @relation(fields: [sourceWebsiteId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceWebsiteId, url])
+  @@map("website_links")
+}
+
+model SourceNotion {
+  id                   String       @id @db.Uuid
+  notionWorkspaceId    String?      @map("notion_workspace_id")
+  accessTokenEncrypted String?      @map("access_token_encrypted")
+  lastSyncedAt         DateTime?    @map("last_synced_at") @db.Timestamptz(6)
+  notionWorkspaceName  String?      @map("notion_workspace_name")
+  syncStatus           String       @default("pending") @map("sync_status")
+  pages                NotionPage[]
+  source               Source       @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("source_notion")
+}
+
+model NotionPage {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceNotionId String       @map("source_notion_id") @db.Uuid
+  notionPageId   String       @map("notion_page_id")
+  title          String?
+  pageType       String       @default("page") @map("page_type")
+  contentSize    Int?         @map("content_size")
+  status         String       @default("pending")
+  isExcluded     Boolean      @default(false) @map("is_excluded")
+  errorMessage   String?      @map("error_message")
+  lastSyncedAt   DateTime?    @map("last_synced_at") @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  sourceNotion   SourceNotion @relation(fields: [sourceNotionId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceNotionId, notionPageId])
+  @@map("notion_pages")
+}
+
+model Chunk {
+  id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceId       String                 @map("source_id") @db.Uuid
+  projectId      String                 @map("project_id") @db.Uuid
+  content        String
+  metadata       Json                   @default("{}")
+  embeddingModel String                 @default("text-embedding-3-small") @map("embedding_model")
+  embedding      Unsupported("vector")?
+  tokensCount    Int                    @default(0) @map("tokens_count")
+  createdAt      DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  project        Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  source         Source                 @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@map("chunks")
+}
+
+model ApiKey {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String    @map("project_id") @db.Uuid
+  name        String
+  keyHash     String    @map("key_hash")
+  keyPrefix   String    @map("key_prefix")
+  permissions Json      @default("[\"read\", \"query\"]")
+  lastUsedAt  DateTime? @map("last_used_at") @db.Timestamptz(6)
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz(6)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model Conversation {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId String    @map("project_id") @db.Uuid
+  sessionId String    @map("session_id")
+  metadata  Json      @default("{}")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String       @map("conversation_id") @db.Uuid
+  role           String
+  content        String
+  sourcesUsed    Json         @default("[]") @map("sources_used")
+  tokensUsed     Int          @default(0) @map("tokens_used")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model UsageRecord {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  projectId      String?      @map("project_id") @db.Uuid
+  type           String
+  amount         Int          @default(1)
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?     @relation(fields: [projectId], references: [id])
+
+  @@map("usage_records")
+}
